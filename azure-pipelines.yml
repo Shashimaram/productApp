@@ -9,20 +9,19 @@ trigger:
 variables:
   commit: NONE
 
-
 pool:
   vmImage: ubuntu-latest
 
-stages: 
+stages:
 - stage:
   jobs:
-  - job: 
+  - job:
     steps:
       - bash: |
           sourceVersionMessage="$(Build.SourceVersionMessage)"
           extractedString=${sourceVersionMessage:0:5}
           echo "The first 5 characters are: $extractedString"
-          echo "##vso[task.setvariable variable=commit]'$extractedString'"
+          echo '##vso[task.setvariable variable=commit]'$extractedString
       - script: |
           echo "##vso[task.setvariable variable=filePath]"
           if [[ "${{ variables.commit }}" == *"bkend"* ]]; then
@@ -43,24 +42,21 @@ stages:
           echo $(commit)
           echo $(repo_name)
           echo $(filePath)
-        displayName: TestingVariables for commands 
 
 - stage: buildPush
   condition: or(eq(variables['commit'], 'ftend'), eq(variables['commit'], 'bkend'))
   jobs:
     - job: installingDockerCli
       steps:
-
         - task: DockerInstaller@0
           inputs:
             dockerVersion: '17.09.0-ce'
-
         - task: Docker@2
           inputs:
             containerRegistry: 'mydockerhub'
             repository: $(repo_name)
             command: 'buildAndPush'
-            Dockerfile: $(filepath)
+            Dockerfile: $(filePath)
             tags: '$(Build.BuildId)'
             addPipelineData: true
         - script: sudo docker images
