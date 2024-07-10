@@ -39,6 +39,10 @@ stages:
             echo "shashidher/frontend_backend"
           fi
         displayName: "setting Reponame"
+      - script: |
+          echo $(commit)
+          echo $(repo_name)
+          echo $(filePath)
 
 - stage: buildPush
   condition: or(eq(variables['commit'], 'ftend'), eq(variables['commit'], 'bkend'))
@@ -60,7 +64,6 @@ stages:
             addPipelineData: true
         - script: sudo docker images
           displayName: checkingDockerImages
-
 
 - stage: ScanningImage
   dependsOn: buildPush
