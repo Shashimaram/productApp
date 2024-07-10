@@ -51,4 +51,10 @@ def root(data: Productdata):
 
 @app.post("/health")
 def health():
-    return {"message": "OK"}
+    return 
+
+
+
+@app.post("/test")
+def health():
+    return {"message":"testSuccessfull "}
