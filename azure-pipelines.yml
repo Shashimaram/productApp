@@ -22,7 +22,6 @@ stages:
           extractedString=${sourceVersionMessage:0:5}
           echo "The first 5 characters are: $extractedString"
           echo "##vso[task.setvariable variable=commit;isOutput=true]$extractedString"
-        name: commitUpdate
       - bash: |
           echo "Setting filePath and repo_name based on commit message..."
           if [[ "$(commit)" == *"bkend"* ]]; then
@@ -39,15 +38,6 @@ stages:
           echo "Repo Name: $(repo_name)"
           echo "File Path: $(filePath)"
 
-- stage: buildPush
-  dependsOn: buildDefine
-  jobs:
-  - job: var_test
-    steps:
-    - script: |
-        echo "Commit: $(dependencies.buildDefine.commitUpdate.outputs['UpdatedVars.commit'])"
-        echo "Repo Name: $(dependencies.buildDefine.updateVariables.outputs['UpdatedVars.repo_name'])"
-        echo "File Path: $(dependencies.buildDefine.updateVariables.outputs['UpdatedVars.filePath'])"
 
 #       displayName: Debug Variables
 #   - job: installingDockerCli
