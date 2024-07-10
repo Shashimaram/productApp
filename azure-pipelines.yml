@@ -41,21 +41,28 @@ stages:
 - stage: buildPush
   condition: or(eq(variables['commit'], 'ftend'), eq(variables['commit'], 'bkend'))
   jobs:
-    - job: installingDockerCli
-      steps:
-        - task: DockerInstaller@0
-          inputs:
-            dockerVersion: '17.09.0-ce'
-        - task: Docker@2
-          inputs:
-            containerRegistry: 'mydockerhub'
-            repository: $(repo_name)
-            command: 'buildAndPush'
-            Dockerfile: $(filePath)
-            tags: '$(Build.BuildId)'
-            addPipelineData: true
-        - script: sudo docker images
-          displayName: checkingDockerImages
+  - job: var_test
+    steps:
+    - script: |
+        echo "Commit: $(commit)"
+        echo "Repo Name: $(repo_name)"
+        echo "File Path: $(filePath)"
+      displayName: Debug Variables
+  - job: installingDockerCli
+    steps:
+      - task: DockerInstaller@0
+        inputs:
+          dockerVersion: '17.09.0-ce'
+      - task: Docker@2
+        inputs:
+          containerRegistry: 'mydockerhub'
+          repository: $(repo_name)
+          command: 'buildAndPush'
+          Dockerfile: $(filePath)
+          tags: '$(Build.BuildId)'
+          addPipelineData: true
+      - script: sudo docker images
+        displayName: checkingDockerImages
 
 - stage: ScanningImage
   dependsOn: buildPush
