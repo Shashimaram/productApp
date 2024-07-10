@@ -23,25 +23,20 @@ stages:
           echo "The first 5 characters are: $extractedString"
           echo '##vso[task.setvariable variable=commit]'$extractedString
       - script: |
-          echo "##vso[task.setvariable variable=filePath]"
-          if [[ "${{ variables.commit }}" == *"bkend"* ]]; then
-            echo "**/backend/Dockerfile"
-          elif [[ "${{ variables.commit }}" == *"ftend"* ]]; then
-            echo "**/frontend/Dockerfile"
+          echo "Setting filePath and repo_name based on commit message..."
+          if [[ "$(commit)" == *"bkend"* ]]; then
+            echo "##vso[task.setvariable variable=filePath;]**/backend/Dockerfile"
+            echo "##vso[task.setvariable variable=repo_name;]shashidher/product_backend"
+          elif [[ "$(commit)" == *"ftend"* ]]; then
+            echo "##vso[task.setvariable variable=filePath;]**/frontend/Dockerfile"
+            echo "##vso[task.setvariable variable=repo_name;]shashidher/frontend_backend"
           fi
-        displayName: 'Set filePath variable'
+        displayName: 'Set filePath and repo_name variables'
       - script: |
-          echo "##vso[task.setvariable variable=repo_name]"
-          if [[ "${{ variables.commit }}" == *"bkend"* ]]; then
-            echo "shashidher/product_backend"
-          elif [[ "${{ variables.commit }}" == *"ftend"* ]]; then
-            echo "shashidher/frontend_backend"
-          fi
-        displayName: "setting Reponame"
-      - script: |
-          echo $(commit)
-          echo $(repo_name)
-          echo $(filePath)
+          echo "Commit: $(commit)"
+          echo "Repo Name: $(repo_name)"
+          echo "File Path: $(filePath)"
+
 
 - stage: buildPush
   condition: or(eq(variables['commit'], 'ftend'), eq(variables['commit'], 'bkend'))
