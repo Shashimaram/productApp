@@ -38,8 +38,9 @@ stages:
           echo "File Path: $(filePath)"
 
 
+
 - stage: buildPush
-  condition: or(eq(variables['commit'], 'ftend'), eq(variables['commit'], 'bkend'))
+  # condition: or(eq(variables['commit'], 'ftend'), eq(variables['commit'], 'bkend'))
   jobs:
   - job: var_test
     steps:
