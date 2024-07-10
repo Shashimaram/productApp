@@ -45,9 +45,9 @@ stages:
   - job: var_test
     steps:
     - script: |
-        echo "Commit: $(commit)"
-        echo "Repo Name: $(repo_name)"
-        echo "File Path: $(filePath)"
+        echo "Commit: $(dependencies.build.setVars.outputs['commit'])"
+        echo "Repo Name: $(dependencies.build.setVars.outputs['repo_name'])"
+        echo "File Path: $(dependencies.build.setVars.outputs['filePath'])"
       displayName: Debug Variables
   - job: installingDockerCli
     steps:
