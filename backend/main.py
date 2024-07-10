@@ -44,6 +44,11 @@ def generatingDescription(productName, productCategory, productPrice):
 def root(data: Productdata):
     logging.info("this is produce")
     print("i am triggred sucessfully")
-    # description = generatingDescription(data.name, data.productCategory, data.price)
-    # create_product(data.name,data.price,data.productCategory,description)
+    description = generatingDescription(data.name, data.productCategory, data.price)
+    create_product(data.name,data.price,data.productCategory,description)
     return {"message": "Done"}
+
+
+@app.post("/health")
+def health():
+    return {"message": "OK"}
