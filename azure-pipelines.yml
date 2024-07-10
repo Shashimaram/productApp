@@ -6,6 +6,7 @@
 trigger:
 - backend
 - frontend
+- main
 
 pool:
   vmImage: ubuntu-latest
@@ -21,7 +22,7 @@ variables:
   ${{ if eq(variables['Build.SourceBranchName'], 'backend') }}:
     value: 'shashidher/product_backend'
   ${{ else }}:
-    value: shashidher/product_frontend
+    value: 'shashidher/product_frontend'
 
 
 
