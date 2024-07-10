@@ -43,6 +43,7 @@ stages:
           echo $(commit)
           echo $(repo_name)
           echo $(filePath)
+        displayName: TestingVariables
 
 - stage: buildPush
   condition: or(eq(variables['commit'], 'ftend'), eq(variables['commit'], 'bkend'))
