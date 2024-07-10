@@ -24,10 +24,10 @@ stages:
           echo "##vso[task.setvariable variable=commit;isOutput=true]$extractedString"
       - bash: |
           echo "Setting filePath and repo_name based on commit message..."
-          if [[ "$(commit)" == *"bkend"* ]]; then
+          if [[ "$(commit)" == *bkend* ]]; then
             echo "##vso[task.setvariable variable=filePath;isOutput=true]**/backend/Dockerfile"
             echo "##vso[task.setvariable variable=repo_name;isOutput=true]shashidher/product_backend"
-          elif [[ "$(commit)" == *"ftend"* ]]; then
+          elif [[ "$(commit)" == *ftend* ]]; then
             echo "##vso[task.setvariable variable=filePath;isOutput=true]**/frontend/Dockerfile"
             echo "##vso[task.setvariable variable=repo_name;isOutput=true]shashidher/frontend_backend"
           fi
