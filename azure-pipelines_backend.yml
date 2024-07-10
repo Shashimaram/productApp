@@ -1,0 +1,62 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- backend
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: buildPush
+    jobs:
+      - job: installingDockerCli
+        steps:
+
+          - task: DockerInstaller@0
+            inputs:
+              dockerVersion: '17.09.0-ce'
+
+          - task: Docker@2
+            inputs:
+              containerRegistry: 'mydockerhub'
+              repository: 'shashidher/product_backend'
+              command: 'buildAndPush'
+              Dockerfile: '**/backend/Dockerfile'
+              tags: '$(Build.BuildId)'
+              addPipelineData: true
+          - script: sudo docker images
+            displayName: checkingDockerImages
+          
+  - stage: ScanningImage
+    jobs:
+      - job: installingTrivyOnAgent
+        steps:
+          - task: DockerInstaller@0
+            inputs:
+                dockerVersion: '17.09.0-ce'
+          - task: Docker@2
+            inputs:
+              containerRegistry: 'mydockerhub'
+              command: 'login'
+          - script: |
+              sudo apt-get install wget apt-transport-https gnupg lsb-release
+              wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+              echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+              sudo apt-get update
+              sudo apt-get install trivy
+          
+          - script: |
+              trivy image --severity HIGH,CRITICAL --format template --template "@./template/junit.tpl" -o junit-test.xml shashidher/product_backend:'$(Build.BuildId)'
+            displayName: scanning Image
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/**-test.xml'
+              mergeTestResults: true
+              failTaskOnFailedTests: false
+              testRunTitle: 'Trivy Vulnerabilities'
+            condition: 'always()'

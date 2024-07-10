@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Product Form</title>
+  </head>
+  <body>
+    <h1>Add a New Product</h1>
+    <form action="/add_product" method="post" enctype="application/x-www-form-urlencoded">
+      <label for="product-name">Product Name:</label><br>
+      <input type="text" id="product-name" name="product_name" required><br>
+      <label for="price">Price:</label><br>
+      <input type="number" id="price" name="price" required><br>
+      <label for="category">Category:</label><br>
+      <input type="text" id="category" name="category" required><br>
+      <input type="submit" value="Submit">
+    </form>
+  </body>
+</html>
