@@ -4,7 +4,6 @@
 # https://aka.ms/yaml
 
 trigger:
-- main
 - backend
 - frontend
 
@@ -13,81 +12,67 @@ pool:
 
 variables:
 - name: filePath
-  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+  ${{ if eq(variables['Build.SourceBranchName'], 'backend') }}:
     value: '**/backend/Dockerfile'
   ${{ else }}:
     value: '**/frontend/Dockerfile'
 
-steps:
-  - script: |
-     echo $(filePath)
+- name: repo_name
+  ${{ if eq(variables['Build.SourceBranchName'], 'backend') }}:
+    value: 'shashidher/product_backend'
+  ${{ else }}:
+    value: shashidher/product_frontend
 
 
-# stages:
-# - stage: buildDefine
-#   jobs:
-#   - job: updateVariables
-#     steps:
-#       - bash: |
-#           echo "Setting filePath and repo_name based on commit message..."
-#           if [[ "$(commit)" == *bkend* ]]; then
-#             echo "##vso[task.setvariable variable=filePath;isOutput=true]**/backend/Dockerfile"
-#             echo "##vso[task.setvariable variable=repo_name;isOutput=true]shashidher/product_backend"
-#           elif [[ "$(commit)" == *ftend* ]]; then
-#             echo "##vso[task.setvariable variable=filePath;isOutput=true]**/frontend/Dockerfile"
-#             echo "##vso[task.setvariable variable=repo_name;isOutput=true]shashidher/frontend_backend"
-#           fi
-#         name: UpdatedVars
-#         displayName: 'Set filePath and repo_name variables'
-#       - bash: |
-#           echo $(commit)"
-#           echo $(repo_name)"
-#           echo $(filePath)"
-#         displayName: Debug Variables
-#   - job: installingDockerCli
-#     steps:
-#   # condition: or(eq(variables['commit'], 'ftend'), eq(variables['commit'], 'bkend'))
-#       - task: DockerInstaller@0
-#         inputs:
-#           dockerVersion: '17.09.0-ce'
-#       - task: Docker@2
-#         inputs:
-#           containerRegistry: 'mydockerhub'
-#           repository: $(repo_name)
-#           command: 'buildAndPush'
-#           Dockerfile: $(filePath)
-#           tags: '$(Build.BuildId)'
-#           addPipelineData: true
-#       - script: sudo docker images
-#         displayName: checkingDockerImages
 
-# - stage: ScanningImage
-#   jobs:
-#     - job: installingTrivyOnAgent
-#       steps:
-#         - task: DockerInstaller@0
-#           inputs:
-#               dockerVersion: '17.09.0-ce'
-#         - task: Docker@2
-#           inputs:
-#             containerRegistry: 'mydockerhub'
-#             command: 'login'
-#         - script: |
-#             sudo apt-get install wget apt-transport-https gnupg lsb-release
-#             wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-#             echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
-#             sudo apt-get update
-#             sudo apt-get install trivy
+
+stages:
+- stage: buildDefine
+  jobs:
+  - job: installingDockerCli
+    steps:
+  # condition: or(eq(variables['commit'], 'ftend'), eq(variables['commit'], 'bkend'))
+      - task: DockerInstaller@0
+        inputs:
+          dockerVersion: '17.09.0-ce'
+      - task: Docker@2
+        inputs:
+          containerRegistry: 'mydockerhub'
+          repository: $(repo_name)
+          command: 'buildAndPush'
+          Dockerfile: $(filePath)
+          tags: '$(Build.BuildId)'
+          addPipelineData: true
+      - script: sudo docker images
+        displayName: checkingDockerImages
+
+- stage: ScanningImage
+  jobs:
+    - job: installingTrivyOnAgent
+      steps:
+        - task: DockerInstaller@0
+          inputs:
+              dockerVersion: '17.09.0-ce'
+        - task: Docker@2
+          inputs:
+            containerRegistry: 'mydockerhub'
+            command: 'login'
+        - script: |
+            sudo apt-get install wget apt-transport-https gnupg lsb-release
+            wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+            echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+            sudo apt-get update
+            sudo apt-get install trivy
         
-#         - script: |
-#             trivy image --severity HIGH,CRITICAL --format template --template "@./template/junit.tpl" -o junit-test.xml $(repo_name):'$(Build.BuildId)'
-#           displayName: scanning Image
+        - script: |
+            trivy image --severity HIGH,CRITICAL --format template --template "@./template/junit.tpl" -o junit-test.xml $(repo_name):'$(Build.BuildId)'
+          displayName: scanning Image
 
-#         - task: PublishTestResults@2
-#           inputs:
-#             testResultsFormat: 'JUnit'
-#             testResultsFiles: '**/**-test.xml'
-#             mergeTestResults: true
-#             failTaskOnFailedTests: false
-#             testRunTitle: 'Trivy Vulnerabilities'
-#           condition: 'always()'
+        - task: PublishTestResults@2
+          inputs:
+            testResultsFormat: 'JUnit'
+            testResultsFiles: '**/**-test.xml'
+            mergeTestResults: true
+            failTaskOnFailedTests: false
+            testRunTitle: 'Trivy Vulnerabilities'
+          condition: 'always()'
