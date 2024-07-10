@@ -34,9 +34,9 @@ stages:
         name: UpdatedVars
         displayName: 'Set filePath and repo_name variables'
       - bash: |
-          echo "Commit: $(commit)"
-          echo "Repo Name: $(repo_name)"
-          echo "File Path: $(filePath)"
+          echo $(commit)"
+          echo $(repo_name)"
+          echo $(filePath)"
 
 
 #       displayName: Debug Variables
